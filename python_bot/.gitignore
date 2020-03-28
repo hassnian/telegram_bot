@@ -1,0 +1,4 @@
+/data
+db.*
+sentence_tokenizer.pickle
+/.idea
