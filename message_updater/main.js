@@ -4,9 +4,7 @@ const path = require('path')
 const getColors = require('get-image-colors')
 const Tesseract = require('tesseract.js');
 const axios = require('axios')
-const robot = require("robotjs");
-const { keyboard, Key, mouse, left, right, up, down, screen } = require("@nut-tree/nut-js");
-var robot = require ("robot-js");
+const puppeteer = require('puppeteer');
 
 const IMG_FOLDER = "imgs/"
 const FILE_NAME =  'screenshot.png'
@@ -71,11 +69,19 @@ const getText = (img) => {
     })
 }
 
+
+const gotoTelegram = async () => {
+    const browser = await puppeteer.launch({headless: false});
+    const page = await browser.newPage();
+    await page.goto('https://web.telegram.org/#/im', {waitUntil: 'networkidle2'});
+
+}
+
 const api = {
     askQuestion : (sentence) => axios.post('http://127.0.0.1:8000/question', {sentence} )
 }
 
-const starApp = async () => {
+const startApp = async () => {
     try {
         await takeScreenshot();
         await extract(FILE_NAME, 'telegram', 'jpg', { left: 2900, top: 100, width: 400, height: 800 })
@@ -90,25 +96,16 @@ const starApp = async () => {
         const text = await getText('last_chat_text.jpg')
         const {data: bot_response} = await api.askQuestion(text)
         const answer = bot_response.answer;
-
-        robot.typeString("Hello World");
-
+        await gotoTelegram()
         console.log(answer)
 
        // console.log('NO_NEW_MESSAGE')
-    }catch (e) {
+    } catch (e) {
         console.log(e)
     }
 
 }
 
 
-const square = async () => {
-    await mouse.move(right(500));
-    await mouse.move(down(500));
-    await mouse.move(left(500));
-    await mouse.move(up(500));
-};
 
-// square()
-// starApp()
+startApp()
